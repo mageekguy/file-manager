@@ -1,8 +1,4 @@
-node_modules/
-
-.git/
-.github/
-.gitignore
-Dockerfile*
+Makefile
+Dockerfile
 LICENSE
 README.md

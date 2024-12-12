@@ -1,12 +1,11 @@
-FROM node:16-bullseye
+FROM node:23-alpine AS base
+ARG TARGETARCH
+ARG TARGETVARIANT
+WORKDIR /app
+CMD ["node", "index.js"]
 
-ENV NODE_ENV=production
+FROM base AS dev
+RUN --mount=type=cache,target=/var/cache/apk,id=file-manager-apk-$TARGETARCH$TARGETVARIANT,sharing=locked apk --update add make g++ python3
 
-COPY . /usr/local/share/file-manager
-RUN cd /usr/local/share/file-manager \
-	&& npm install . \
-	&& rm -rf ~/.npm ~/.cache
-
-WORKDIR /data
-
-CMD ["node", "/usr/local/share/file-manager/index.js"]
+FROM base AS prod
+COPY . /app

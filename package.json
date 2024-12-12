@@ -1,0 +1,6 @@
+{
+  "name": "file-manager",
+  "workspaces": [
+    "app"
+  ]
+}
