@@ -82,15 +82,15 @@ endif
 bin: $(shell cat $(THIS_MAKEFILE) | grep -E '^bin/[^:]+:' | cut -d: -f1)
 
 bin/npm: $(THIS_MAKEFILE) | bin/. .install/docker/$(DOCKER_DEV_TAG)
-	echo '$(DOCKER) run -u $$(id -u):$$(id -g) --rm -it -v $(HOME)/.npm:/.npm -v $$(dirname $$(dirname $$(readlink -f $$0)))/app:/app -w /app $(DOCKER_REPOSITORY)/$(DOCKER_PROJECT):$(DOCKER_DEV_TAG) npm --no-update-notifier --cache /.npm "$$@"' > $@
+	echo '$(DOCKER) run -u $$(id -u):$$(id -g) --rm -it -v $(HOME)/.npm:/.npm -v $$(dirname $$(dirname $$(readlink -f $$0))):/app -w /app $(DOCKER_REPOSITORY)/$(DOCKER_PROJECT):$(DOCKER_DEV_TAG) npm --no-update-notifier --cache /.npm "$$@"' > $@
 	chmod u+x $@
 
 bin/node: $(THIS_MAKEFILE) | bin/. .install/docker/$(DOCKER_DEV_TAG)
-	echo '$(DOCKER) run -u $$(id -u):$$(id -g) --rm -it -v $$(dirname $$(dirname $$(readlink -f $$0)))/app:/app -w /app $(DOCKER_REPOSITORY)/$(DOCKER_PROJECT):$(DOCKER_DEV_TAG) "$$@"' > $@
+	echo '$(DOCKER) run -u $$(id -u):$$(id -g) --rm -it -v $$(dirname $$(dirname $$(readlink -f $$0))):/app -w /app $(DOCKER_REPOSITORY)/$(DOCKER_PROJECT):$(DOCKER_DEV_TAG) "$$@"' > $@
 	chmod u+x $@
 
 .PHONY: install
-install: bin app/node_modules/.package-lock.json .install/docker/$(DOCKER_DEV_TAG) ## <Environment> Install all dependencies
+install: bin node_modules/.package-lock.json .install/docker/$(DOCKER_DEV_TAG) ## <Environment> Install all dependencies
 
 .PHONY: reinstall
 reinstall: ## <Environment> Clean all and reinstall all dependencies
@@ -102,12 +102,12 @@ reinstall: ## <Environment> Clean all and reinstall all dependencies
 	$(DOCKER) buildx build --builder $(DOCKER_BUILDER) --load -t $(DOCKER_REPOSITORY)/$(DOCKER_PROJECT):$(DOCKER_DEV_TAG) --target dev .
 	> $@
 
-app/node_modules/.package-lock.json: app/package-lock.json | bin/npm
+node_modules/.package-lock.json: package-lock.json | bin/npm
 	./bin/npm --no-update-notifier install --no-fund
 
 .PHONY: start
 start: install ## <Environment> Start HTTP server used to upload configuration files
-	echo "Server successfully started, go to http://$$($(DOCKER) port $$($(DOCKER) run --name $(DOCKER_NAME) -p $(DOCKER_PORT):8080 -u $$(id -u):$$(id -g) -v $$(pwd)/app:/app -w /app -d $(DOCKER_REPOSITORY)/$(DOCKER_PROJECT):$(DOCKER_DEV_TAG)) 8080 | head -n 1)!" 
+	echo "Server successfully started, go to http://$$($(DOCKER) port $$($(DOCKER) run --name $(DOCKER_NAME) -p $(DOCKER_PORT):8080 -u $$(id -u):$$(id -g) -v $$(pwd):/app -w /app -d $(DOCKER_REPOSITORY)/$(DOCKER_PROJECT):$(DOCKER_DEV_TAG)) 8080 | head -n 1)!" 
 
 .PHONY: stop
 stop: ## <Environment> Stop HTTP server used to upload configuration files
@@ -123,7 +123,7 @@ dist: | dist/$(DOCKER_DIST_TAG) ## <Build> Create dist directory according to cu
 
 dist/$(DOCKER_DIST_TAG): | dist/$(DOCKER_DIST_TAG)/. .install/docker/$(DOCKER_DEV_TAG)
 	$(GIT) archive --worktree-attributes --format=tar $(DOCKER_DIST_TAG) | tar -x -C dist/$(DOCKER_DIST_TAG)
-	$(DOCKER) run -u $$(id -u):$$(id -g) --rm -it -v $(HOME)/.npm:/.npm -v $$(pwd)/dist/$(DOCKER_DIST_TAG)/app:/app -w /app -e PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true $(DOCKER_REPOSITORY)/$(DOCKER_PROJECT):$(DOCKER_DEV_TAG) npm --cache /.npm --no-update-notifier install --no-fund --omit dev
+	$(DOCKER) run -u $$(id -u):$$(id -g) --rm -it -v $(HOME)/.npm:/.npm -v $$(pwd)/dist/$(DOCKER_DIST_TAG):/app -w /app $(DOCKER_REPOSITORY)/$(DOCKER_PROJECT):$(DOCKER_DEV_TAG) npm --cache /.npm --no-update-notifier install --no-fund --omit dev
 
 .PHONY: docker
 docker: dist/$(DOCKER_DIST_TAG)/docker.built
@@ -148,11 +148,7 @@ clean/docker: ## <Cleaning> Delete all stuff related to docker
 
 .PHONY: clean
 clean: clean/docker ## <Cleaning> Delete all files, directories and docker images created at runtime
-	for gitignore in $$(find . -type f -name .gitignore -not -path "./dist/*"); do \
-		for file in $$(cat $$gitignore | grep -v '.config.mk'); do \
-			$(RM) $$file; \
-		done; \
-	done
+	$(GIT) clean -Xdf
 
 .PHONY: help
 help:
