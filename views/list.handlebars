@@ -18,9 +18,9 @@
 				{{#each files}}
 					<li class="list-group-item">
 						<label for="check{{@index}}" class="stretched-invisible-label">
-							<div class="form-check">
+							<div class="form-check align-items-center">
 								<input type="checkbox" class="form-check-input multi-select" data-select="{{name}}" data-select-size="{{size}}" data-select-type="{{#if isdirectory}}directory{{else}}file{{/if}}" id="check{{@index}}">
-								<span class="form-check-label d-flex align-items-start justify-content-between">
+								<span class="form-check-label d-flex justify-content-between align-items-center">
 									{{#if isdirectory}}
 										<a href="./{{name}}/" class="name">{{name}}/</a>
 									{{else}}
@@ -29,7 +29,17 @@
 										<span class="badge rounded-pill bg-danger badge-alignment">err</span>
 									{{else}}
 										<a href="./{{name}}" class="name">{{name}}</a>
+										<div>
 										<span class="badge rounded-pill bg-secondary badge-alignment">{{filesize size}}</span>
+										{{#if cmd}}
+											<span class="ms-3">
+											<a class="btn btn-info btn-sm run-cmd" href="@cmd" data-bs-toggle="modal" data-cmd="{{cmd}}" data-select="{{name}}" data-bs-target="#cmd" title="Run a command on ./{{name}}" data-bs-placement="top">
+												{{octicon "terminal"}}
+												<span class="d-sm-inline">Run command</span>
+											</a>
+											</span>
+										{{/if}}
+										</div>
 									{{/if}}
 									{{/if}}
 								</span>
@@ -55,7 +65,6 @@
 {{> dialogue-upload}}
 {{> dialogue-mkdir}}
 {{> dialogue-cmd}}
-
 {{> dialogue-download}}
 {{> dialogue-rename}}
 {{> dialogue-delete}}
