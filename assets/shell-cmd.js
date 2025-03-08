@@ -4,6 +4,7 @@ const $shell = $("#shell")
 const $close = $("#shell-close")
 
 if ($shell.length > 0) {
+	alert('shell-cmd')
 	const ws = new WebSocket(
 		"ws" +
 		(window.location.protocol === "https:" ? "s" : "") +
@@ -19,6 +20,8 @@ if ($shell.length > 0) {
 	const fitAddon = new FitAddon.FitAddon()
 	term.loadAddon(fitAddon)
 	term.open($shell[0])
+
+	console.log('shell-cmd')
 
 	ws.addEventListener("open", () => {
 		// resize
@@ -63,42 +66,3 @@ if ($shell.length > 0) {
 		})
 	})
 }
-
-let runInShellTerm = null
-let ws = null
-
-const setRunInShellTerm = (runInShellBtn) => {
-	let btn = $(runInShellBtn.currentTarget)
-
-	ws = new WebSocket(
-		(window.location.protocol === "http:" ? "ws" : "wss") + "://" +
-		window.location.host +
-		"/websocket?path=" +
-		encodeURIComponent(btn.data("dir"))
-	)
-
-	runInShellTerm = new Terminal({
-		cols: 123
-	})
-
-	ws.addEventListener("open", () => {
-		runInShellTerm.loadAddon(new AttachAddon.AttachAddon(ws, { bidirectional: true }))
-		runInShellTerm.open(document.getElementById('run-in-shell-term'))
-		ws.send(btn.data('cmd') + ' ' + btn.data("file"))
-	})
-}
-
-$('#run-in-shell').on('shown.bs.modal', function () {
-	$('#run-in-shell').trigger('focus')
-})
-
-$('#run-in-shell').on('hidden.bs.modal', () => {
-	if (runInShellTerm) {
-		runInShellTerm.dispose()
-		runInShellTerm = null
-		ws.close()
-		ws = null
-	}
-})
-
-$(".run-in-shell").on("click", setRunInShellTerm)

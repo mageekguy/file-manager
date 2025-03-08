@@ -582,6 +582,15 @@ if (shellable || cmdable || cmdfilable) {
 		)
 	})
 
+	app.get("/*@run-in-shell", (req, res) => {
+		res.render(
+			"shell",
+			flashify(req, {
+				path: res.filename,
+			})
+		)
+	})
+
 	const ws = new WebSocket.Server({ server: http })
 	ws.on("connection", (socket, request) => {
 		const { path } = querystring.parse(request.url.split("?")[1])
@@ -604,6 +613,7 @@ if (shellable || cmdable || cmdfilable) {
 			socket.close()
 		})
 		socket.on("message", (data) => {
+			console.log(data.toString())
 			// special messages should decode to Buffers
 			if (data.length == 6) {
 				switch (data.readUInt16BE(0)) {
@@ -679,6 +689,7 @@ app.get("/*", (req, res) => {
 									})
 								}
 								resolve({
+									dir: res.filename,
 									name: f,
 									isdirectory: stats.isDirectory(),
 									issmallimage: isimage(f) && stats.size < SMALL_IMAGE_MAX_SIZE,
