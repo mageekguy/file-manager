@@ -605,7 +605,7 @@ if (shellable || cmdable || cmdfilable) {
 			"pid " + term.pid + " shell " + process.env.SHELL + " started in " + cwd
 		)
 
-		term.on("data", (data) => {
+		term.onData((data) => {
 			socket.send(data, { binary: true })
 		})
 		term.on("exit", (code) => {
@@ -613,7 +613,6 @@ if (shellable || cmdable || cmdfilable) {
 			socket.close()
 		})
 		socket.on("message", (data) => {
-			console.log(data.toString())
 			// special messages should decode to Buffers
 			if (data.length == 6) {
 				switch (data.readUInt16BE(0)) {
