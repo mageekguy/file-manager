@@ -494,8 +494,12 @@ app.post("/*@rename", (req, res) => {
 
 const shellable = process.env.SHELL != "false" && process.env.SHELL
 const cmdable = process.env.CMD != "false" && process.env.CMD
-const cmdfilable = process.env.CMD_BY_FILE != "false" && process.env.CMD_BY_FILE ? JSON.parse(process.env.CMD_BY_FILE) : {}
-if (shellable || cmdable || cmdfilable) {
+const cmdByFile = process.env.CMD_BY_FILE ? JSON.parse(process.env.CMD_BY_FILE) : {}
+const shellByFile = process.env.SHELL_BY_FILE ? JSON.parse(process.env.SHELL_BY_FILE) : []
+
+console.log(shellByFile)
+
+if (shellable || cmdable || cmdByFile || shellByFile) {
 	const shellArgs = process.env.SHELL.split(" ")
 	const exec = process.env.SHELL == "login" ? "/usr/bin/env" : shellArgs[0]
 	const args = process.env.SHELL == "login" ? ["login"] : shellArgs.slice(1)
@@ -640,13 +644,25 @@ function isimage(f) {
 	return false
 }
 
-function getCmdFilable(f) {
-	for (const [ext, cmd] of Object.entries(cmdfilable)) {
+function isFileWithCommand(f) {
+	for (const [ext, cmd] of Object.entries(cmdByFile)) {
 		if (f.endsWith('.' + ext)) {
 			return cmd
 		}
-		return false
 	}
+
+	return false
+}
+
+function isFileWithShell(f) {
+	for (const ext of shellByFile) {
+		console.log(ext)
+		if (f.endsWith('.' + ext)) {
+			return true
+		}
+	}
+
+	return false
 }
 
 app.get("/*", (req, res) => {
@@ -692,7 +708,8 @@ app.get("/*", (req, res) => {
 									name: f,
 									isdirectory: stats.isDirectory(),
 									issmallimage: isimage(f) && stats.size < SMALL_IMAGE_MAX_SIZE,
-									cmd: getCmdFilable(f),
+									cmdByFile: isFileWithCommand(f),
+									shellByFile: isFileWithShell(f),
 									size: stats.size,
 								})
 							})
@@ -701,7 +718,6 @@ app.get("/*", (req, res) => {
 
 				Promise.all(promises)
 					.then((files) => {
-						console.log(JSON.stringify(files))
 						res.render(
 							"list",
 							flashify(req, {
