@@ -33,7 +33,7 @@
 										<span class="badge rounded-pill bg-secondary badge-alignment">{{filesize size}}</span>
 										{{#if shellByFile}}
 											<span class="ms-3">
-											<a class="btn btn-info btn-sm run-in-shell" href="@run-in-shell" data-bs-toggle="modal" data-cmd="{{cmd}}" data-dir="{{dir}}" data-file="{{name}}" data-bs-target="#run-in-shell" title="Run command in shell on ./{{name}}" data-bs-placement="top">
+											<a class="btn btn-info btn-sm run-in-shell" href="@run-in-shell" data-bs-toggle="modal" data-cmd="{{shellByFile}}" data-dir="{{dir}}" data-file="{{name}}" data-bs-target="#run-in-shell" title="Run command in shell on ./{{name}}" data-bs-placement="top">
 												{{octicon "terminal"}}
 												<span class="d-sm-inline">Run in shell</span>
 											</a>

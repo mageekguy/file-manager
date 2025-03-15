@@ -495,7 +495,7 @@ app.post("/*@rename", (req, res) => {
 const shellable = process.env.SHELL != "false" && process.env.SHELL
 const cmdable = process.env.CMD != "false" && process.env.CMD
 const cmdByFile = process.env.CMD_BY_FILE ? JSON.parse(process.env.CMD_BY_FILE) : {}
-const shellByFile = process.env.SHELL_BY_FILE ? JSON.parse(process.env.SHELL_BY_FILE) : []
+const shellByFile = process.env.SHELL_BY_FILE ? JSON.parse(process.env.SHELL_BY_FILE) : {}
 
 console.log(shellByFile)
 
@@ -655,10 +655,9 @@ function isFileWithCommand(f) {
 }
 
 function isFileWithShell(f) {
-	for (const ext of shellByFile) {
-		console.log(ext)
+	for (const [ext, cmd] of Object.entries(cmdByFile)) {
 		if (f.endsWith('.' + ext)) {
-			return true
+			return cmd
 		}
 	}
 

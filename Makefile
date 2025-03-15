@@ -107,7 +107,7 @@ node_modules/.package-lock.json: package-lock.json | bin/npm
 
 .PHONY: start
 start: install ## <Environment> Start HTTP server used to upload configuration files
-	echo "Server successfully started, go to http://$$($(DOCKER) port $$($(DOCKER) run --name $(DOCKER_NAME) -p $(DOCKER_PORT):8080 -u $$(id -u):$$(id -g) -v $$(pwd):/app -w /app -e CMD="true" -e SHELL_BY_FILE='[ "json" ]' -e CMD_BY_FILE='{ "json": "cat"}' -e SHELL=sh -d $(DOCKER_REPOSITORY)/$(DOCKER_PROJECT):$(DOCKER_DEV_TAG)) 8080 | head -n 1)!" 
+	echo "Server successfully started, go to http://$$($(DOCKER) port $$($(DOCKER) run --name $(DOCKER_NAME) -p $(DOCKER_PORT):8080 -u $$(id -u):$$(id -g) -v $$(pwd):/app -w /app -e CMD="true" -e SHELL_BY_FILE='{ "json": "cat" }' -e CMD_BY_FILE='{ "json": "cat"}' -e SHELL=sh -d $(DOCKER_REPOSITORY)/$(DOCKER_PROJECT):$(DOCKER_DEV_TAG)) 8080 | head -n 1)!" 
 
 .PHONY: stop
 stop: ## <Environment> Stop HTTP server used to upload configuration files
